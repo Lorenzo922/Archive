@@ -2,95 +2,69 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Lista de Arquivos</title>
+  <title>Lista Dinâmica de Arquivos do GitHub</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      margin: 0;
+      max-width: 600px;
+      margin: 40px auto;
+      background: #f9f9f9;
       padding: 20px;
+      border-radius: 8px;
     }
     h1 {
       text-align: center;
       color: #333;
     }
-    .file-list {
-      max-width: 600px;
-      margin: 20px auto;
-      background: white;
-      border-radius: 6px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      padding: 15px 25px;
+    ul {
+      list-style: none;
+      padding-left: 0;
     }
-    .file-item {
-      display: flex;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid #eee;
+    li {
+      margin: 8px 0;
     }
-    .file-item:last-child {
-      border-bottom: none;
-    }
-    .file-name {
-      flex-grow: 1;
-      font-weight: 600;
-      color: #555;
+    a {
       text-decoration: none;
+      color: #0366d6;
+      font-weight: 600;
     }
-    .file-name:hover {
+    a:hover {
       text-decoration: underline;
-    }
-    .file-size {
-      color: #999;
-      font-size: 0.9em;
-      margin-left: 15px;
-      white-space: nowrap;
     }
   </style>
 </head>
 <body>
 
-  <h1>Lista de Arquivos</h1>
+  <h1>Arquivos na pasta "arquivos"</h1>
+  <ul id="file-list"></ul>
 
-  <div class="file-list">
+  <script>
+    const user = 'seuusuario';       // <== Coloque seu usuário GitHub aqui
+    const repo = 'meurepo';           // <== Coloque o nome do seu repositório aqui
+    const folderPath = 'arquivos';    // <== Coloque a pasta que quer listar
 
-    <div class="file-item">
-      <a class="file-name" href="arquivos/documento1.pdf" download>documento1.pdf</a>
-      <div class="file-size">1.2 MB</div>
-    </div>
+    const fileListElement = document.getElementById('file-list');
 
-    <div class="file-item">
-      <a class="file-name" href="arquivos/foto-de-familia.jpg" download>foto-de-familia.jpg</a>
-      <div class="file-size">2.8 MB</div>
-    </div>
-
-    <div class="file-item">
-      <a class="file-name" href="arquivos/musica-favorita.mp3" download>musica-favorita.mp3</a>
-      <div class="file-size">5.5 MB</div>
-    </div>
-
-    <div class="file-item">
-      <a class="file-name" href="arquivos/video-evento.mp4" download>video-evento.mp4</a>
-      <div class="file-size">150 MB</div>
-    </div>
-
-    <div class="file-item">
-      <a class="file-name" href="arquivos/planilha-orcamento.xlsx" download>planilha-orcamento.xlsx</a>
-      <div class="file-size">800 KB</div>
-    </div>
-
-    <div class="file-item">
-      <a class="file-name" href="arquivos/backup.zip" download>backup.zip</a>
-      <div class="file-size">450 MB</div>
-    </div>
-
-    <div class="file-item">
-      <a class="file-name" href="arquivos/codigo-fonte.js" download>codigo-fonte.js</a>
-      <div class="file-size">15 KB</div>
-    </div>
-
-  </div>
+    fetch(`https://api.github.com/repos/${user}/${repo}/contents/${folderPath}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Erro ao carregar arquivos');
+        return res.json();
+      })
+      .then(data => {
+        data.forEach(file => {
+          if (file.type === 'file') {
+            const li = document.createElement('li');
+            // Link direto para o arquivo raw
+            const rawUrl = file.download_url;
+            li.innerHTML = `<a href="${rawUrl}" target="_blank" download>${file.name}</a>`;
+            fileListElement.appendChild(li);
+          }
+        });
+      })
+      .catch(err => {
+        fileListElement.innerHTML = `<li>Erro: ${err.message}</li>`;
+      });
+  </script>
 
 </body>
 </html>
